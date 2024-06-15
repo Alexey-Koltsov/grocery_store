@@ -123,6 +123,21 @@ REST_FRAMEWORK = {
     ]
 }
 
+# Настройки Djoser
+
+DJOSER = {
+    'LOGIN_FIELD': 'email',
+    'SERIALIZERS': {
+        'user_create': 'api.serializers.CustomUserCreateSerializer',
+        'current_user': 'api.serializers.CustomUserSerializer',
+    },
+    'PERMISSIONS': {
+        'user': ['djoser.permissions.CurrentUserOrAdmin'],
+        'user_list': ['djoser.permissions.CurrentUserOrAdmin'],
+    },
+    'HIDE_USERS': False,
+}
+
 # Длины полей и количество символов
 
 MAX_LEN_USERNAME = 150

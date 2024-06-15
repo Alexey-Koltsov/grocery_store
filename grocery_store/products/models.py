@@ -1,9 +1,10 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Exists, OuterRef
 
-from products.basemodels import BaseModel, Image
+from products.basemodels import BaseModel
 
 User = get_user_model()
 
@@ -11,7 +12,12 @@ User = get_user_model()
 class Category(BaseModel):
     """Модель категорий"""
 
-    pass
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
+    def __str__(self):
+        return self.name[:settings.SYMBOLS_QUANTITY]
 
 
 class SubCategory(BaseModel):
@@ -23,6 +29,13 @@ class SubCategory(BaseModel):
         related_name='category',
         verbose_name='Категория',
     )
+
+    class Meta:
+        verbose_name = 'Подкатегория'
+        verbose_name_plural = 'Податегории'
+
+    def __str__(self):
+        return self.name[:settings.SYMBOLS_QUANTITY]
 
 
 class ProductQuerySet(models.QuerySet):
@@ -37,26 +50,26 @@ class ProductQuerySet(models.QuerySet):
         )
 
 
-class Product(BaseModel):
+class Product(models.Model):
     """Модель продуктов"""
 
-    image = models.ForeignKey(
-        Image,
-        on_delete=models.CASCADE,
-        related_name='products_image',
-        verbose_name='Изображения продуктов',
+    name = models.CharField(
+        max_length=settings.MAX_LEN_NAME,
+        verbose_name='Название',
+    )
+    slug = models.SlugField(
+        max_length=settings.MAX_LEN_SLUG,
+        null=True,
+        verbose_name='Уникальный слаг',
+        validators=[RegexValidator(
+            r'^[-a-zA-Z0-9_]+$', 'Недопустимый символ.'
+        )],
     )
     sub_category = models.ForeignKey(
         SubCategory,
         on_delete=models.CASCADE,
         related_name='sub_category',
         verbose_name='Подкатегория',
-    )
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='user',
-        verbose_name='Пользователь',
     )
     price = models.DecimalField(
         max_digits=10,
@@ -86,6 +99,29 @@ class Product(BaseModel):
         return self.name[:settings.SYMBOLS_QUANTITY]
 
 
+class Image(models.Model):
+    """Модель изображений"""
+
+    product = models.ForeignKey(
+        Product,
+        related_name='products_image',
+        verbose_name='Продукт',
+        on_delete=models.CASCADE
+    )
+    image = models.ImageField(
+        upload_to='products/images/',
+        null=True,
+        default=None,
+    )
+
+    class Meta:
+        verbose_name = 'Изображение продукта'
+        verbose_name_plural = 'Изображение продуктов'
+
+    def __str__(self):
+        return self.product.name[:settings.SYMBOLS_QUANTITY]
+
+
 class ShoppingCart(models.Model):
     """Модель корзины"""
 
@@ -97,7 +133,7 @@ class ShoppingCart(models.Model):
     )
     product = models.ForeignKey(
         Product,
-        related_name='product',
+        related_name='product_in_shopping_cart',
         verbose_name='Продукт',
         on_delete=models.CASCADE
     )

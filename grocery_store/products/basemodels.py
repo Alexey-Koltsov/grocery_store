@@ -3,20 +3,6 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 
-class Image(models.Model):
-    """Модель изображений"""
-
-    name = models.CharField(
-        max_length=settings.MAX_LEN_NAME,
-        verbose_name='Название изображения',
-    )
-    image = models.ImageField(
-        upload_to='products/images/',
-        null=True,
-        default=None,
-    )
-
-
 class BaseModel(models.Model):
     """Базовая модель"""
 
@@ -32,9 +18,10 @@ class BaseModel(models.Model):
             r'^[-a-zA-Z0-9_]+$', 'Недопустимый символ.'
         )],
     )
-    image = models.OneToOneField(
-        Image,
-        on_delete=models.CASCADE
+    image = models.ImageField(
+        upload_to='products/images/',
+        null=True,
+        default=None,
     )
 
     class Meta:
