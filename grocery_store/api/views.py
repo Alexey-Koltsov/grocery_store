@@ -4,16 +4,24 @@ from django.db.models.functions import Lower
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, render
 from djoser.serializers import SetPasswordSerializer
-from rest_framework import status, viewsets
+from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (AllowAny, IsAdminUser, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 
+from api.mixins import CustomCreateUpdateDestroyMixin
+from api.pagination import CustomPagination
+from api.permissions import IsOwner
 from api.serializers import (CategorySerializer, CustomUserCreateSerializer,
-                             CustomUserSerializer, ProductSerializer)
+                             CustomUserSerializer,
+                             ProductInShoppingCartSerializer,
+                             ProductSerializer,
+                             ShoppingCartSerializer,)
 
-from products.models import Category, Product
+
+from products.models import Category, Product, ShoppingCart
 
 User = get_user_model()
 
@@ -25,9 +33,8 @@ def page_not_found(request, exception):
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     """
-    Cоздаем нового пользователя, получаем список всех пользователей,
-    получаем страницу пользователя по id,
-    получаем страницу текущего пользователя.
+    Cоздаем нового пользователя, получаем страницу текущего пользователя,
+    изменаем пароль.
     """
 
     http_method_names = ('get', 'post')
@@ -92,6 +99,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
+    pagination_class = CustomPagination
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -100,9 +108,9 @@ class ProductViewSet(viewsets.ModelViewSet):
     """
 
     http_method_names = ('get')
-    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         queryset = Product.objects.add_user_annotations(self.request.user.pk)
@@ -111,4 +119,50 @@ class ProductViewSet(viewsets.ModelViewSet):
         )
         if is_in_shopping_cart is not None:
             queryset = queryset.filter(is_in_shopping_cart=is_in_shopping_cart)
+        return queryset
+
+
+class APIShoppingCartCreateUpdateDestroy(CustomCreateUpdateDestroyMixin):
+    """
+    Добавляем продукт в корзину, изменяем количество продукта,
+    удаляем продукт из корзины по id.
+    """
+
+    serializer_class = ProductInShoppingCartSerializer
+    permission_classes = [IsOwner]
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        queryset = ShoppingCart.objects.filter(user=self.request.user)
+        return queryset
+
+
+class APIShoppingCartListDestroy(generics.ListAPIView,
+                                 generics.DestroyAPIView):
+    """
+    Получаем список всех продуктов из корзины,
+    очищаем корзину от всех продуктов.
+    """
+
+    serializer_class = ShoppingCartSerializer
+    permission_classes = [IsOwner]
+    #pagination_class = CustomPagination
+
+    def get_queryset(self):
+        return User.objects.filter(username=self.request.user)
+
+
+class ExtraAPIShoppingCartListDestroy(generics.ListAPIView,
+                                      generics.DestroyAPIView):
+    """
+    Получаем список всех продуктов из корзины,
+    очищаем корзину от всех продуктов.
+    """
+
+    serializer_class = ShoppingCartSerializer
+    permission_classes = [IsOwner]
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        queryset = ShoppingCart.objects.filter(user=self.request.user)
         return queryset
