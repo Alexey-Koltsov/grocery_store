@@ -107,19 +107,32 @@ class ProductViewSet(viewsets.ModelViewSet):
     Получаем список всех продуктов, получаем продукт по id.
     """
 
-    http_method_names = ('get')
+    http_method_names = ('get', 'delete')
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        queryset = Product.objects.add_user_annotations(self.request.user.pk)
-        is_in_shopping_cart = self.request.query_params.get(
-            'is_in_shopping_cart', None
-        )
-        if is_in_shopping_cart is not None:
-            queryset = queryset.filter(is_in_shopping_cart=is_in_shopping_cart)
-        return queryset
+        if 'shopping_cart' in self.request.path:
+            return ShoppingCart.objects.filter(user=self.request.user)
+        return Product.objects.add_user_annotations(self.request.user.pk)
+
+    @action(
+        methods=['get', 'delete'],
+        serializer_class=ShoppingCartSerializer,
+        permission_classes=[IsOwner],
+        detail=False,
+        url_path='shopping_cart',
+    )
+    def shopping_cart(self, request):
+        if self.request.method == 'DELETE':
+            ShoppingCart.objects.filter(user=request.user).delete()
+            return Response(
+                'Корзина очищена!',
+                status=status.HTTP_204_NO_CONTENT
+            )
+        serializer = self.get_serializer(self.get_queryset())
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class APIShoppingCartCreateUpdateDestroy(CustomCreateUpdateDestroyMixin):
@@ -133,36 +146,4 @@ class APIShoppingCartCreateUpdateDestroy(CustomCreateUpdateDestroyMixin):
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        queryset = ShoppingCart.objects.filter(user=self.request.user)
-        return queryset
-
-
-class APIShoppingCartListDestroy(generics.ListAPIView,
-                                 generics.DestroyAPIView):
-    """
-    Получаем список всех продуктов из корзины,
-    очищаем корзину от всех продуктов.
-    """
-
-    serializer_class = ShoppingCartSerializer
-    permission_classes = [IsOwner]
-    #pagination_class = CustomPagination
-
-    def get_queryset(self):
-        return User.objects.filter(username=self.request.user)
-
-
-class ExtraAPIShoppingCartListDestroy(generics.ListAPIView,
-                                      generics.DestroyAPIView):
-    """
-    Получаем список всех продуктов из корзины,
-    очищаем корзину от всех продуктов.
-    """
-
-    serializer_class = ShoppingCartSerializer
-    permission_classes = [IsOwner]
-    pagination_class = CustomPagination
-
-    def get_queryset(self):
-        queryset = ShoppingCart.objects.filter(user=self.request.user)
-        return queryset
+        return ShoppingCart.objects.filter(user=self.request.user)

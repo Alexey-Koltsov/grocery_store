@@ -228,7 +228,7 @@ class ProductInShoppingCartSerializer(serializers.ModelSerializer):
 
     def get_queryset(self):
         return self.context['request'].user.shopping_cart.all().annotate(
-            total_summ=Sum("product__price" * "amount")
+            total_summ=Sum('product__price' * 'amount')
         )
 
     def validate_product(self, value):
@@ -250,6 +250,37 @@ class ProductInShoppingCartSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Сериализатор для получения всех товаров корзины."""
+
+    list_of_products = serializers.SerializerMethodField()
+    total_summ = serializers.SerializerMethodField()
+    products_count = serializers.SerializerMethodField()
+
+    def get_queryset(self):
+        return ShoppingCart.objects.filter(
+            user=self.context['request'].user
+        )
+
+    def get_total_summ(self, obj):
+        return self.get_queryset().annotate(
+            summ=F('product__price') * F('amount')
+        ).aggregate(total_summ=Sum('summ'))['total_summ']
+
+    def get_products_count(self, obj):
+        return obj.count()
+
+    def get_list_of_products(self, obj):
+        return ProductInShoppingCartSerializer(
+            ShoppingCart.objects.filter(user=self.context['request'].user),
+            many=True
+        ).data
+
+    class Meta:
+        model = ShoppingCart
+        fields = ('list_of_products', 'total_summ', 'products_count')
+
+
+class ExtraShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для получения всех товаров корзины."""
 
     list_of_products = serializers.SerializerMethodField()

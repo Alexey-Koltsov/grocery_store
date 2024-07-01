@@ -47,7 +47,6 @@ class CustomCreateUpdateDestroyMixin(generics.CreateAPIView,
 
     def check_product_in_shopping_cart_exist(self):
         if not self.get_queryset().exists():
-            print('Такого объекта не существует!')
             return Response(
                 'Такого объекта не существует!',
                 status=status.HTTP_400_BAD_REQUEST

@@ -9,7 +9,6 @@ class InlineSubCategory(admin.StackedInline):
 
 
 class InlineImage(admin.StackedInline):
-    #fk_name = 'product'
     model = Image
     extra = 0
 
@@ -52,7 +51,6 @@ class ProductAdmin(admin.ModelAdmin):
 
     list_display = (
         'name',
-        #'image',
         'sub_category',
         'price',
         'measurement_unit',
