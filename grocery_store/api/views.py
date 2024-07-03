@@ -128,7 +128,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if self.request.method == 'DELETE':
             ShoppingCart.objects.filter(user=request.user).delete()
             return Response(
-                'Корзина очищена!',
+                {'message': 'Корзина очищена!'},
                 status=status.HTTP_204_NO_CONTENT
             )
         serializer = self.get_serializer(self.get_queryset())

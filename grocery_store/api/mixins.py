@@ -76,6 +76,6 @@ class CustomCreateUpdateDestroyMixin(generics.CreateAPIView,
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response(
-            'Объект удален!',
+            {'message': 'Объект удален!'},
             status=status.HTTP_204_NO_CONTENT
         )
