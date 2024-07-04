@@ -1,0 +1,114 @@
+[
+{
+  "model": "products.category",
+  "pk": 1,
+  "fields": {
+    "name": "Фрукты",
+    "slug": "fruits",
+    "image": "products/images/fruits_lEpZ17M.bmp"
+  }
+},
+{
+  "model": "products.category",
+  "pk": 2,
+  "fields": {
+    "name": "Овощи",
+    "slug": "vegetable",
+    "image": "products/images/vegetable.bmp"
+  }
+},
+{
+  "model": "products.subcategory",
+  "pk": 1,
+  "fields": {
+    "name": "Бананы",
+    "slug": "bananas",
+    "image": "products/images/bananas_Henzg8d.bmp",
+    "category": 1
+  }
+},
+{
+  "model": "products.subcategory",
+  "pk": 2,
+  "fields": {
+    "name": "картофель",
+    "slug": "potato",
+    "image": "products/images/potato.bmp",
+    "category": 2
+  }
+},
+{
+  "model": "products.image",
+  "pk": 2,
+  "fields": {
+    "product": 1,
+    "image": "products/images/mini_1_alI3yUw.bmp"
+  }
+},
+{
+  "model": "products.image",
+  "pk": 3,
+  "fields": {
+    "product": 1,
+    "image": "products/images/mini_2_0dckZ9B.bmp"
+  }
+},
+{
+  "model": "products.image",
+  "pk": 4,
+  "fields": {
+    "product": 1,
+    "image": "products/images/mini_3_9LkW8tQ.bmp"
+  }
+},
+{
+  "model": "products.image",
+  "pk": 5,
+  "fields": {
+    "product": 2,
+    "image": "products/images/potato_3x.bmp"
+  }
+},
+{
+  "model": "products.image",
+  "pk": 6,
+  "fields": {
+    "product": 2,
+    "image": "products/images/potato_3x_BI02iWO.bmp"
+  }
+},
+{
+  "model": "products.image",
+  "pk": 7,
+  "fields": {
+    "product": 2,
+    "image": "products/images/potato_3x_VcA6BV1.bmp"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 1,
+  "fields": {
+    "name": "Минибананы",
+    "slug": "minibananas",
+    "sub_category": 1,
+    "price": "149.00",
+    "measurement_unit": "кг",
+    "is_avaliable": true,
+    "pub_date": "2024-06-15T10:39:40.949Z"
+  }
+},
+{
+  "model": "products.product",
+  "pk": 2,
+  "fields": {
+    "name": "Картофель нового урожая",
+    "slug": "potato_new_harvest",
+    "sub_category": 2,
+    "price": "65.00",
+    "measurement_unit": "кг",
+    "is_avaliable": true,
+    "pub_date": "2024-06-17T23:08:25.676Z"
+  }
+}
+]
